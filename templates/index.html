@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitness Planner</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, sans-serif;
+            background: url("{{ url_for('static', filename='images/gym_bg.jpg') }}") no-repeat center center fixed;
+            background-size: cover;
+            margin: 0; padding: 40px 20px;
+        }
+        body::before {
+            content: ""; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.6); z-index: -1;
+        }
+        .container { max-width: 750px; margin: auto; padding: 40px; background-color: rgba(255, 255, 255, 0.95); box-shadow: 0 10px 30px rgba(0,0,0,0.3); border-radius: 16px; margin-bottom: 30px; }
+        .header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #f1f5f9; }
+        .header-title h2 { margin: 0; color: #1e293b; font-weight: 800; font-size: 24px; }
+        .header-title small { color: #64748b; font-size: 14px; }
+        .header-buttons a { text-decoration: none; padding: 10px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-dash { background: #e0e7ff; color: #4f46e5; } .btn-dash:hover { background: #c7d2fe; }
+        .btn-logout { background: #fee2e2; color: #991b1b; margin-left: 10px; } .btn-logout:hover { background: #fecaca; }
+        label { display: block; margin: 20px 0 8px; font-weight: 700; color: #475569; font-size: 14px; text-transform: uppercase; }
+        label i { color: #4f46e5; margin-right: 5px; }
+        input, textarea { width: 100%; padding: 14px 16px; margin-bottom: 5px; border: 2px solid #e2e8f0; border-radius: 10px; box-sizing: border-box; font-size: 15px; background: #f8fafc; transition: 0.3s; }
+        input:focus, textarea:focus { border-color: #4f46e5; background: #fff; box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1); outline: none; }
+        textarea { resize: vertical; height: 100px; }
+        .btn-primary { width: 100%; padding: 16px; background: linear-gradient(135deg, #4f46e5 0%, #764ba2 100%); color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: 800; cursor: pointer; margin-top: 30px; transition: 0.3s; box-shadow: 0 5px 15px rgba(79, 70, 229, 0.3); }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(79, 70, 229, 0.4); }
+        .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .btn-result { width: 100%; padding: 15px; background-color: white; color: #4f46e5; border: 2px solid #4f46e5; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-result:hover { background-color: #4f46e5; color: white; transform: translateY(-2px); }
+        .btn-pdf { width: 100%; padding: 15px; background-color: #10b981; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-pdf:hover { background-color: #059669; }
+        .bmi-box { padding: 20px; border-radius: 12px; margin-bottom: 30px; font-weight: bold; text-align: center; }
+        .bmi-normal { background:#dcfce7; color:#166534; border: 2px solid #bbf7d0; } .bmi-overweight { background:#fef9c3; color:#854d0e; border: 2px solid #fde047; } .bmi-obese { background:#fee2e2; color:#991b1b; border: 2px solid #fecaca; } .bmi-underweight { background:#e0f2fe; color:#075985; border: 2px solid #bae6fd; }
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(5px); }
+        .modal-content { background-color: #fefefe; margin: 10% auto; padding: 30px; border: 1px solid #888; width: 90%; max-width: 500px; border-radius: 16px; }
+        .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; } .close:hover { color: #000; }
+        .modal-content ul li { padding: 10px; border-bottom: 1px solid #f1f5f9; }
+        @media (max-width: 600px) { .result-grid { grid-template-columns: 1fr; } .header-flex { flex-direction: column; text-align: center; gap: 15px; } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header-flex">
+        <div class="header-title"><h2>Fitness Planner</h2><small>Welcome, {{ user_name }}</small></div>
+        <div class="header-buttons">
+            <a href="/dashboard" class="btn-dash"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+            <a href="/logout" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </div>
+    <form method="POST">
+        <label><i class="fas fa-user"></i> Full Name</label>
+        <input type="text" name="name" value="{{ user_name }}" required>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div><label><i class="fas fa-weight"></i> Weight (kg)</label><input type="number" step="0.1" name="weight" required placeholder="e.g. 70"></div>
+            <div><label><i class="fas fa-ruler-vertical"></i> Height (cm)</label><input type="number" step="0.1" name="height" required placeholder="e.g. 175"></div>
+        </div>
+        <label><i class="fas fa-utensils"></i> Dietary Preferences</label><input type="text" name="dietary_preferences" required placeholder="e.g. Veg, Non-Veg, Vegan">
+        <label><i class="fas fa-bullseye"></i> Fitness Goals</label><input type="text" name="fitness_goals" required placeholder="e.g. Weight Loss, Muscle Gain">
+        <label><i class="fas fa-briefcase"></i> Lifestyle Factors</label><input type="text" name="lifestyle_factors" required placeholder="e.g. Desk job, Active">
+        <label><i class="fas fa-ban"></i> Dietary Restrictions</label><input type="text" name="dietary_restrictions" required placeholder="e.g. None, Sugar-free">
+        <label><i class="fas fa-heartbeat"></i> Health Conditions</label><input type="text" name="health_conditions" required placeholder="e.g. None, Diabetes">
+        <label><i class="fas fa-question-circle"></i> Specific Questions</label><textarea name="user_query" required placeholder="Ask the AI coach specific details..."></textarea>
+        <button type="submit" class="btn-primary"><i class="fas fa-magic"></i> Generate My Plan</button>
+    </form>
+</div>
+
+{% if recommendations %}
+<div class="container">
+    <h2 style="text-align: center; color: #1e293b; margin-bottom: 25px;">Your Personalized Plan</h2>
+    {% if bmi %}<div class="bmi-box {{ bmi_class }}"><i class="fas fa-info-circle"></i> BMI: {{ bmi }} ({{ bmi_category }})</div>{% endif %}
+    <div class="result-grid">
+        <button class="btn-result" onclick="showModal('dietModal')"><i class="fas fa-carrot"></i> Diet Plan</button>
+        <button class="btn-result" onclick="showModal('workoutModal')"><i class="fas fa-dumbbell"></i> Workout</button>
+        <button class="btn-result" onclick="showModal('breakfastModal')"><i class="fas fa-egg"></i> Breakfast</button>
+        <button class="btn-result" onclick="showModal('dinnerModal')"><i class="fas fa-moon"></i> Dinner</button>
+        <button class="btn-result" style="grid-column: span 2;" onclick="showModal('tipsModal')"><i class="fas fa-lightbulb"></i> Extra Tips</button>
+    </div>
+    <a href="/download_pdf" style="text-decoration: none;"><button type="button" class="btn-pdf"><i class="fas fa-file-pdf"></i> Download PDF Report</button></a>
+</div>
+{% endif %}
+
+<div id="dietModal" class="modal"><div class="modal-content"><span class="close" onclick="closeModal('dietModal')">&times;</span><h3>Diet Types</h3><ul>{% for item in recommendations.diet_types %}<li>{{ item }}</li>{% endfor %}</ul></div></div>
+<div id="workoutModal" class="modal"><div class="modal-content"><span class="close" onclick="closeModal('workoutModal')">&times;</span><h3>Workout</h3><ul>{% for item in recommendations.workouts %}<li>{{ item }}</li>{% endfor %}</ul></div></div>
+<div id="breakfastModal" class="modal"><div class="modal-content"><span class="close" onclick="closeModal('breakfastModal')">&times;</span><h3>Breakfast</h3><ul>{% for item in recommendations.breakfasts %}<li>{{ item }}</li>{% endfor %}</ul></div></div>
+<div id="dinnerModal" class="modal"><div class="modal-content"><span class="close" onclick="closeModal('dinnerModal')">&times;</span><h3>Dinner</h3><ul>{% for item in recommendations.dinners %}<li>{{ item }}</li>{% endfor %}</ul></div></div>
+<div id="tipsModal" class="modal"><div class="modal-content"><span class="close" onclick="closeModal('tipsModal')">&times;</span><h3>Tips</h3><ul>{% for item in recommendations.additional_tips %}<li>{{ item }}</li>{% endfor %}</ul></div></div>
+
+<script>
+function showModal(id) { document.getElementById(id).style.display = "block"; }
+function closeModal(id) { document.getElementById(id).style.display = "none"; }
+window.onclick = function(event) { if (event.target.classList.contains('modal')) { event.target.style.display = "none"; } }
+</script>
+</body>
+</html>

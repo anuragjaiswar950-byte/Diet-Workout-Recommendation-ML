@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Super Admin Database</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #111827; color: #f3f4f6; padding: 20px; }
+        .container { max-width: 1200px; margin: auto; }
+
+        h1 { text-align: center; color: #60a5fa; margin-bottom: 10px; }
+        h2 { color: #facc15; border-bottom: 2px solid #374151; padding-bottom: 10px; margin-top: 40px; }
+
+        .btn-back { display: inline-block; padding: 10px 20px; background: #ef4444; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; margin-bottom: 20px; }
+        .btn-back:hover { background: #dc2626; }
+
+        table { width: 100%; border-collapse: collapse; background: #1f2937; border-radius: 8px; overflow: hidden; margin-bottom: 20px; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #374151; }
+        th { background-color: #374151; color: #9ca3af; text-transform: uppercase; font-size: 14px; letter-spacing: 1px; }
+        tr:hover { background-color: #374151; }
+        td { color: #d1d5db; font-size: 14px; }
+
+        .log-login { color: #4ade80; font-weight: bold; }
+        .log-logout { color: #f87171; }
+        .log-new { color: #fbbf24; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="/dashboard" class="btn-back"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+    <h1>🕵️ Super Admin Panel</h1>
+    <p style="text-align: center; color: #9ca3af;">Viewing Database as: <strong>admin12@gmail.com</strong></p>
+
+    <h2>📊 Live Activity Logs (Kaun kya kar raha hai)</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>User</th>
+                <th>Email</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs %}
+            <tr>
+                <td>{{ log[4] }}</td>
+                <td>{{ log[1] }}</td>
+                <td>{{ log[2] }}</td>
+                <td>
+                    {% if 'Login' in log[3] %} <span class="log-login">Login</span>
+                    {% elif 'Logout' in log[3] %} <span class="log-logout">Logout</span>
+                    {% elif 'New Account' in log[3] %} <span class="log-new">New Register</span>
+                    {% else %} {{ log[3] }} {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>👥 All Registered Users</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Password (Hashed)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user[0] }}</td>
+                <td>{{ user[1] }}</td>
+                <td>{{ user[2] }}</td>
+                <td>{{ user[3] }}</td>
+                <td style="font-family: monospace; color: #6b7280;">{{ user[4][:15] }}...</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>📈 User Progress Data</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Date</th>
+                <th>Weight</th>
+                <th>Height</th>
+                <th>BMI</th>
+                <th>Category</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in progress %}
+            <tr>
+                <td>{{ row[1] }}</td>
+                <td>{{ row[2] }}</td>
+                <td>{{ row[3] }} kg</td>
+                <td>{{ row[4] }} cm</td>
+                <td>{{ row[5] }}</td>
+                <td>{{ row[6] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>

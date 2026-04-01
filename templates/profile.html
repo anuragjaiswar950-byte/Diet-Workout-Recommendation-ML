@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Fitness App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: url("{{ url_for('static', filename='images/gym_bg.jpg') }}") no-repeat center center fixed;
+            background-size: cover;
+            margin: 0; padding: 20px;
+        }
+        body::before {
+            content: ""; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.6); z-index: -1;
+        }
+        .container { max-width: 900px; margin: auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; background: rgba(255, 255, 255, 0.95); padding: 20px 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .header h2 { color: #1f2937; margin: 0; }
+        .back-btn { text-decoration: none; color: #4f46e5; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .back-btn:hover { text-decoration: underline; }
+        .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .card { background: rgba(255, 255, 255, 0.95); padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .card-header { border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 20px; font-size: 18px; font-weight: bold; color: #374151; display: flex; align-items: center; gap: 10px; }
+        .card-header i { color: #4f46e5; }
+        label { display: block; margin-bottom: 8px; font-size: 14px; color: #6b7280; font-weight: 600; }
+        input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #d1d5db; border-radius: 8px; box-sizing: border-box; font-size: 14px; transition: 0.3s; }
+        input:focus { border-color: #4f46e5; outline: none; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+        input[readonly] { background-color: #f9fafb; color: #9ca3af; cursor: not-allowed; }
+        button { width: 100%; padding: 12px; background: #4f46e5; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s; }
+        button:hover { background-color: #4338ca; }
+        .btn-danger { background-color: #ef4444; } .btn-danger:hover { background-color: #dc2626; }
+        .full-width { grid-column: span 2; }
+        .alert { padding: 15px; margin-bottom: 20px; border-radius: 8px; font-size: 14px; }
+        .success { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+        .error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+        @media (max-width: 768px) { .profile-grid { grid-template-columns: 1fr; } .full-width { grid-column: span 1; } }
+    </style>
+</head>
+<body>
+<div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}<div class="alert {{ category }}">{{ message }}</div>{% endfor %}
+        {% endif %}
+    {% endwith %}
+    <div class="header">
+        <h2>My Profile</h2><a href="/dashboard" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+    </div>
+    <div class="profile-grid">
+        <div class="card">
+            <div class="card-header"><i class="fas fa-user-edit"></i> Personal Details</div>
+            <form method="POST">
+                <input type="hidden" name="update_info" value="true">
+                <label>Full Name</label><input type="text" name="name" value="{{ user[1] }}" required>
+                <label>Email Address</label><input type="email" value="{{ user[2] }}" readonly title="Email cannot be changed">
+                <label>Phone Number</label><input type="text" name="phone" value="{{ user[3] }}" required pattern="\d{10}" title="10 digit number">
+                <button type="submit">Save Changes</button>
+            </form>
+        </div>
+        <div class="card">
+            <div class="card-header"><i class="fas fa-weight"></i> Update Body Stats</div>
+            <div style="margin-bottom: 15px; font-size: 13px; color: #666;">Updating this will add a new entry to your progress graph.</div>
+            <form method="POST">
+                <input type="hidden" name="update_stats" value="true">
+                <label>Current Weight (kg)</label><input type="number" step="0.1" name="weight" value="{{ stats[0] }}" required>
+                <label>Height (cm)</label><input type="number" step="0.1" name="height" value="{{ stats[1] }}" required>
+                <button type="submit" style="background-color: #10b981;">Update Progress</button>
+            </form>
+        </div>
+        <div class="card full-width">
+            <div class="card-header"><i class="fas fa-lock"></i> Security</div>
+            <form method="POST" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <input type="hidden" name="update_password" value="true">
+                <div style="grid-column: span 2;"><label>Current Password</label><input type="password" name="current_password" required placeholder="Enter current password to verify"></div>
+                <div><label>New Password</label><input type="password" name="new_password" required placeholder="Min 8 characters"></div>
+                <div><label>Confirm New Password</label><input type="password" name="confirm_password" required placeholder="Retype new password"></div>
+                <div style="grid-column: span 2;"><button type="submit" class="btn-danger">Change Password</button></div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>
