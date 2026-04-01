@@ -6,7 +6,7 @@ import json
 import re
 from io import BytesIO
 
-# PDF LIBRARIES (Professional PDF ke liye)
+# PDF LIBRARIES 
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -25,8 +25,7 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 
 # ================= SETTINGS =================
-# ⚠️ TERI API KEY (Jo tune di thi)
-API_KEY = "AIzaSyD7moXk0zozZ8et17KTdVslpU-sO9k8egg"
+API_KEY = ""
 client = genai.Client(api_key=API_KEY)
 
 # 👑 ADMIN EMAIL
@@ -107,7 +106,7 @@ def init_db():
                        TEXT
                    )""")
 
-    # Activity Logs (Admin Panel ke liye)
+    # Activity Logs 
     cursor.execute("""
                    CREATE TABLE IF NOT EXISTS activity_logs
                    (
@@ -230,7 +229,7 @@ def logout():
     return redirect(url_for('login'))
 
 
-# ================= MAIN APP (TERA ORIGINAL LOGIC) =================
+# ================= MAIN APP  =================
 @app.route("/", methods=["GET", "POST"])
 @login_required
 def index():
@@ -239,7 +238,6 @@ def index():
     bmi_category = None
     bmi_class = None
 
-    # Agar purana plan memory mein hai to dikha do (Refresh karne par gayab nahi hoga)
     if request.method == "GET" and current_user.id in USER_PLANS:
         saved = USER_PLANS[current_user.id]
         recommendations = saved['content']
@@ -282,7 +280,6 @@ def index():
 
         log_activity(name, current_user.email, "Generated Plan")
 
-        # TERA ORIGINAL PROMPT (Maine change nahi kiya)
         prompt = f"""
         Create a personalized fitness plan.
         Name: {name}
@@ -298,7 +295,7 @@ def index():
         """
 
         response = client.models.generate_content(
-            model="gemini-3-flash-preview",  # Tera model
+            model="gemini-3-flash-preview",  
             contents=prompt
         )
 
@@ -310,7 +307,6 @@ def index():
         except:
             recommendations = None
 
-        # SAVE TO MEMORY (Ye hai main fix taaki PDF chale)
         USER_PLANS[current_user.id] = {
             'name': name, 'date': datetime.now().strftime("%Y-%m-%d"),
             'weight': weight, 'height': height, 'bmi': bmi,
@@ -323,11 +319,10 @@ def index():
                            bmi_class=bmi_class, user_name=current_user.name, is_admin=is_admin)
 
 
-# ================= PDF ROUTE (PROFESSIONAL FIX) =================
+# ================= PDF ROUTE  =================
 @app.route("/download_pdf")
 @login_required
 def download_pdf():
-    # Fetch from Memory instead of Session
     plan_data = USER_PLANS.get(current_user.id)
     if not plan_data: return "No Plan Generated yet!"
 
@@ -415,7 +410,7 @@ def dashboard():
         bmi_category = data[-1][3]
         weight_change = round(current_weight - start_weight, 2)
 
-    # Admin Logic (Sirf Admin ko dikhega)
+    # Admin Logic 
     is_admin = (current_user.email == ADMIN_EMAIL)
     admin_data = {}
     if is_admin:
@@ -477,7 +472,7 @@ def profile():
         elif 'update_stats' in request.form:
             w, h = float(request.form['weight']), float(request.form['height'])
             bmi = round(w / ((h / 100) ** 2), 2)
-            cat = "Normal"  # Logic simplified for brevity
+            cat = "Normal" 
             cursor.execute(
                 "INSERT INTO progress (name, date, weight, height, bmi, category, user_email) VALUES (?, ?, ?, ?, ?, ?, ?)",
                 (current_user.name, datetime.now().strftime("%Y-%m-%d"), w, h, bmi, cat, current_user.email))
